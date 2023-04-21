@@ -16,11 +16,11 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-# Connect to SQLite database
+
 conn = sqlite3.connect('bot.db')
 c = conn.cursor()
 
-# Create table to store message times
+
 c.execute('''CREATE TABLE IF NOT EXISTS questions
              (id INTEGER PRIMARY KEY, message_id INTEGER, time TIMESTAMP)''')
 
@@ -81,7 +81,6 @@ async def handle_message(message: types.Message):
             if message.text == "stats":
                 c.execute("SELECT DISTINCT sender_id FROM answers")
                 sender_ids = [row[0] for row in c.fetchall()]
-                print(sender_ids)
                 rows_by_sender_id = defaultdict(list)
                 for sender_id in sender_ids:
                     c.execute("""SELECT questions.time, answers.time
@@ -102,21 +101,20 @@ async def handle_message(message: types.Message):
                     total_time = sum(time_diffs, timedelta())
                     avg_time = (total_time / len(time_diffs))
                     avg_time_graph.append(avg_time.total_seconds()/60)
-                    print(avg_time_graph)
-                    # await bot.send_message(chat_id=message.chat.id, text=f"Sender ID {sender_id}: {avg_time}")
+
+
                 
                 senders_graph = []
                 for i in sender_ids:
                     senders_graph.append(str(i))
-                print(senders_graph)
 
-                # plt.xticks(num_senders_list,sender_ids, rotation=90)
+
                 plt.bar(senders_graph, avg_time_graph, color='blue', width=0.4)
                 plt.xlabel('Curator')
                 plt.ylabel('Average Time of Reply in Minutes')
                 plt.title('Average Time of Reply by Curator')
 
-                # plt.show()
+ 
 
                 buf = io.BytesIO()
                 plt.savefig(buf, format='png')
@@ -125,9 +123,7 @@ async def handle_message(message: types.Message):
                 
                 photo = InputFile(buf)
                 await message.reply_photo(photo=photo)
-
-                    # with open('histogram.png', 'rb') as photo:
-                    #     await bot.send_photo(chat_id=message.chat.id, photo=photo)                
+              
                     
                         
 if __name__ == '__main__':
